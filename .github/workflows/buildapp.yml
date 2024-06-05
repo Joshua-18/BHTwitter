@@ -91,5 +91,7 @@ jobs:
       - name: Build and Package
         run: |
           cd main
+          export THEOS=/Users/runner/work/theos
+          export PATH=$THEOS/bin:$PATH
           chmod +x build.sh
           ./build.sh --sideloaded
