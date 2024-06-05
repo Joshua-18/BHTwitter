@@ -1,6 +1,3 @@
-# Original idea by @ISnackable. Many thanks to him for handling the most hardest parts!
-# https://github.com/ISnackable/CercubePlus/blob/main/.github/workflows/Build.yml
-
 name: Build and Release BHTwitter
 
 on:
@@ -8,11 +5,6 @@ on:
     inputs:
       decrypted_twitter_url:
         description: "The direct URL to the decrypted Twitter ipa"
-        default: ""
-        required: true
-        type: string
-      build_option:
-        description: "Build option: --rootless, --trollstore, --sideloaded, or none"
         default: ""
         required: true
         type: string
@@ -115,26 +107,25 @@ jobs:
           source ~/.bash_profile
           cd ${{ github.workspace }}/main
           chmod +x ./build.sh
-          ./build.sh ${{ inputs.build_option }}
+          ./build.sh --sideloaded
           OUTPUT_FILE=$(ls -t packages | head -n1)
-          mv "packages/$OUTPUT_FILE" "packages/BHTwitter_${{ inputs.build_option }}_${{ env.TWITTER_VERSION }}.ipa"        
-          echo "package=$(ls -t packages | head -n1)" >>$GITHUB_OUTPUT
+          mv "packages/$OUTPUT_FILE" "packages/BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}.ipa"
+          echo "package=$(ls -t packages | head -n1)" >> $GITHUB_OUTPUT
           echo -e "==> \033[1mSHASUM256: $(shasum -a 256 packages/*.ipa | cut -f1 -d' ')\033[0m"
-          echo -e "==> \033[1mBuild Option: ${{ inputs.build_option }}\033[0m"
         env:
           THEOS: ${{ github.workspace }}/theos
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.3.3
         with:
-          name: BHTwitter_${{ inputs.build_option }}_${{ env.TWITTER_VERSION }}
+          name: BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}
           path: ${{ github.workspace }}/main/packages/${{ steps.build_package.outputs.package }}
           if-no-files-found: error
       
       - name: Prepare Release Notes
         run: |
           export TODAY=$(date '+%Y-%m-%d')
-          echo -e "## Release Notes\n\n**Build Option:** ${{ inputs.build_option }}\n**Twitter Version:** ${{ env.TWITTER_VERSION }}\n**Date:** $TODAY\n\n- Built using BHTwitter project." > ${{ github.workspace }}/release_notes.md
+          echo -e "## Release Notes\n\n**Build Option:** Sideloaded\n**Twitter Version:** ${{ env.TWITTER_VERSION }}\n**Date:** $TODAY\n\n- Built using BHTwitter project." > ${{ github.workspace }}/release_notes.md
 
       - name: Create Release
         id: create_release
@@ -143,9 +134,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DRAFT: ${{ inputs.create_release }}
         with:
-          tag_name: v${{ env.TWITTER_VERSION }}-${{ inputs.build_option }}
-          name: v${{ env.TWITTER_VERSION }}-${{ inputs.build_option }} - BHTwitter
-          files: main/packages/*.ipa
+          tag_name: v${{ env.TWITTER_VERSION }}-sideloaded
+          name: v${{ env.TWITTER_VERSION }}-sideloaded - BHTwitter
+          files: main/packages/BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}.ipa
           draft: ${{ env.DRAFT }}
           body_path: ${{ github.workspace }}/release_notes.md
 
