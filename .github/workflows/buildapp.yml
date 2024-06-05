@@ -94,3 +94,42 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
           THEOS_MAKE_PATH: ${{ github.workspace }}/theos/makefiles
+
+      - name: Check for IPA File
+        run: |
+          cd main/packages
+          if [ -f "BHTwitter-sideloaded.ipa" ]; then
+            echo "IPA file exists."
+          else
+            echo "IPA file not found!"
+            exit 1
+          fi
+
+      - name: Create GitHub Release
+        if: ${{ github.event.inputs.create_release }}
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: v${{ github.event.inputs.twitter_version }}-sideloaded
+          release_name: v${{ github.event.inputs.twitter_version }}-sideloaded - BHTwitter
+          draft: true
+          prerelease: true
+          body: |
+            **Release Notes**
+
+            - Build Option: Sideloaded
+            - Twitter Version: ${{ github.event.inputs.twitter_version }}
+            - Date: ${{ github.event.date }}
+
+            - Built using BHTwitter project.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        if: ${{ github.event.inputs.create_release }}
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: main/packages/BHTwitter-sideloaded.ipa
+          asset_name: BHTwitter-sideloaded.ipa
+          asset_content_type: application/octet-stream
