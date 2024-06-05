@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4
         with:
           path: main
           ref: ${{ github.event.inputs.commit_id || github.ref }}
@@ -42,16 +42,14 @@ jobs:
         run: brew install ldid dpkg make
 
       - name: Setup Theos
-        uses: actions/checkout@v4.1.6
-        with:
-          repository: theos/theos
-          ref: 3da31488281ecf4394d10302d2629607f4a1aa07
-          path: theos
-          submodules: recursive
+        run: |
+          git clone --recursive https://github.com/theos/theos.git ${{ github.workspace }}/theos
+          echo "export THEOS=${{ github.workspace }}/theos" >> $GITHUB_ENV
+          echo "export THEOS_MAKE_PATH=${{ github.workspace }}/theos/makefiles" >> $GITHUB_ENV
 
       - name: Caching
         id: SDK
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         env:
           cache-name: iOS-16.4-SDK
         with:
@@ -70,7 +68,7 @@ jobs:
           THEOS: ${{ github.workspace }}/theos
 
       - name: Setup Theos Jailed
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4
         with:
           repository: qnblackcat/theos-jailed
           ref: master
@@ -78,7 +76,7 @@ jobs:
           submodules: recursive
         
       - name: Set PATH environment variable
-        run: echo "export PATH=\$PATH:${{ github.workspace }}/theos:${{ github.workspace }}/theos-jailed" >> ~/.bash_profile
+        run: echo "export PATH=\$PATH:${{ github.workspace }}/theos:${{ github.workspace }}/theos-jailed" >> $GITHUB_ENV
 
       - name: Export decrypted twitter ipa
         run: |
@@ -91,7 +89,8 @@ jobs:
       - name: Build and Package
         run: |
           cd main
-          export THEOS=/Users/runner/work/theos
-          export PATH=$THEOS/bin:$PATH
           chmod +x build.sh
           ./build.sh --sideloaded
+        env:
+          THEOS: ${{ github.workspace }}/theos
+          THEOS_MAKE_PATH: ${{ github.workspace }}/theos/makefiles
