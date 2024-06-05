@@ -37,13 +37,26 @@ do
 
       echo -e '\033[1m\033[32mDownloading libcephei SDK.\033[0m'
       temp_dir=$(mktemp -d)
-      curl -L -o "$temp_dir/libcephei.zip" "$libcephei_URL"
-      unzip -o "$temp_dir/libcephei.zip" -d ./packages
+      curl -L -o "$temp_dir/libcephei.zip" "$libcephei_URL" || {
+        echo -e '\033[1m\033[31mError: Failed to download libcephei SDK.\033[0m'
+        exit 1
+      }
+      unzip -o "$temp_dir/libcephei.zip" -d ./packages || {
+        echo -e '\033[1m\033[31mError: Failed to extract libcephei SDK.\033[0m'
+        exit 1
+      }
       rm -rf "$temp_dir"
       rm -rf ./packages/__MACOSX
 
       echo -e '\033[1m\033[32mBuilding the IPA.\033[0m'
-      azule -i "$IPA_PATH" -o "$PROJECT_PATH/packages" -n BHTwitter-sideloaded -r -f "$PROJECT_PATH/.theos/obj/debug/keychainfix.dylib" "$PROJECT_PATH/.theos/obj/debug/libbhFLEX.dylib" "$PROJECT_PATH/.theos/obj/debug/BHTwitter.dylib" "$PROJECT_PATH/packages/Cephei.framework" "$PROJECT_PATH/packages/CepheiUI.framework" "$PROJECT_PATH/packages/CepheiPrefs.framework" "$PROJECT_PATH/layout/Library/Application Support/BHT/BHTwitter.bundle"
+      if ! command -v azule &> /dev/null; then
+        echo -e '\033[1m\033[31mError: azule command not found. Please make sure it\'s installed and available in PATH.\033[0m'
+        exit 1
+      fi
+      azule -i "$IPA_PATH" -o "$PROJECT_PATH/packages" -n BHTwitter-sideloaded -r -f "$PROJECT_PATH/.theos/obj/debug/keychainfix.dylib" "$PROJECT_PATH/.theos/obj/debug/libbhFLEX.dylib" "$PROJECT_PATH/.theos/obj/debug/BHTwitter.dylib" "$PROJECT_PATH/packages/Cephei.framework" "$PROJECT_PATH/packages/CepheiUI.framework" "$PROJECT_PATH/packages/CepheiPrefs.framework" "$PROJECT_PATH/layout/Library/Application Support/BHT/BHTwitter.bundle" || {
+        echo -e '\033[1m\033[31mError: Failed to build the IPA.\033[0m'
+        exit 1
+      }
 
       echo -e '\033[1m\033[32mDone, thanks for using BHTwitter.\033[0m'
       break
