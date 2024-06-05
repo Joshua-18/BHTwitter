@@ -115,11 +115,24 @@ jobs:
         env:
           THEOS: ${{ github.workspace }}/theos
 
+      - name: Verify Package
+        run: |
+          ls -lh main/packages/
+          FILE_PATH="main/packages/BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}.ipa"
+          if [ ! -f "$FILE_PATH" ]; then
+            echo "File not found: $FILE_PATH"
+            exit 1
+          fi
+          if [ ! -s "$FILE_PATH" ]; then
+            echo "File is empty: $FILE_PATH"
+            exit 1
+          fi
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4.3.3
         with:
           name: BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}
-          path: ${{ github.workspace }}/main/packages/${{ steps.build_package.outputs.package }}
+          path: ${{ github.workspace }}/main/packages/BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}.ipa
           if-no-files-found: error
       
       - name: Prepare Release Notes
