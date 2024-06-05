@@ -17,6 +17,8 @@ OPTS=$(getopt -a weather --longoptions $LONG -- "$@")
 libcephei_URL="https://cdn.discordapp.com/attachments/755439561454256132/1184388888475738243/libcephei.zip?ex=658bcb1b&is=6579561b&hm=24bf1a932b1a91dda5826435bddef3114febc54c11c8e6a995c800d7db644e67&"
 PROJECT_PATH=$(pwd)
 
+echo "Current working directory: $PROJECT_PATH"
+
 while :
 do
   case "$1" in
@@ -37,14 +39,17 @@ do
 
       echo -e '\033[1m\033[32mDownloading libcephei SDK.\033[0m'
       temp_dir=$(mktemp -d)
+      echo "Temp directory created: $temp_dir"
       curl -L -o "$temp_dir/libcephei.zip" "$libcephei_URL" || {
         echo -e '\033[1m\033[31mError: Failed to download libcephei SDK.\033[0m'
         exit 1
       }
+      echo "libcephei SDK downloaded successfully."
       unzip -o "$temp_dir/libcephei.zip" -d ./packages || {
         echo -e '\033[1m\033[31mError: Failed to extract libcephei SDK.\033[0m'
         exit 1
       }
+      echo "libcephei SDK extracted successfully."
       rm -rf "$temp_dir"
       rm -rf ./packages/__MACOSX
 
