@@ -101,7 +101,9 @@ jobs:
           echo "TWITTER_VERSION=$(grep -A 1 '<key>CFBundleVersion</key>' main/tmp/Payload/Twitter.app/Info.plist | grep '<string>' | awk -F'[><]' '{print $3}')" >> $GITHUB_ENV
           rm -rf main/tmp/Payload/Twitter.app/_CodeSignature/CodeResources
           rm -rf main/tmp/Payload/Twitter.app/PlugIns/*
-          cp -R main/Extensions/*.appex main/tmp/Payload/Twitter.app/PlugIns
+          if [ -d "main/Extensions" ]; then
+            cp -R main/Extensions/*.appex main/tmp/Payload/Twitter.app/PlugIns
+          fi
         env:
           THEOS: ${{ github.workspace }}/theos
           TWITTER_URL: ${{ inputs.decrypted_twitter_url }}
