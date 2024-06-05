@@ -108,6 +108,7 @@ jobs:
           cd ${{ github.workspace }}/main
           chmod +x ./build.sh
           ./build.sh --sideloaded
+          ls -lh packages/
           OUTPUT_FILE=$(ls -t packages | head -n1)
           mv "packages/$OUTPUT_FILE" "packages/BHTwitter-sideloaded_${{ env.TWITTER_VERSION }}.ipa"
           echo "package=$(ls -t packages | head -n1)" >> $GITHUB_OUTPUT
