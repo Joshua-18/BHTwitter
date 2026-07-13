@@ -56,11 +56,14 @@ jobs:
 
     steps:
       - name: Checkout Main
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: main
           ref: ${{ github.event.inputs.commit_id || github.ref }}
           submodules: recursive
+
+      - name: Untrusted Homebrew taps
+        run: brew untap aws/tap || true
 
       - name: Install Dependencies
         run: brew install make dpkg ldid
@@ -70,7 +73,7 @@ jobs:
           echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
 
       - name: Download Theos
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: theos/theos
           ref: master
@@ -83,7 +86,7 @@ jobs:
 
       - name: iOS SDK Caching
         id: SDK
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         env:
           cache-name: iOS-${{ inputs.sdk_version }}-SDK
         with:
@@ -145,7 +148,7 @@ jobs:
 
       - name: Upload Artifact
         if: ${{ inputs.upload_artifact }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: BHTwitter_${{ env.BHTWITTER_VERSION }}
           path: ${{ github.workspace }}/main/packages/${{ steps.package_name.outputs.package }}
@@ -154,7 +157,7 @@ jobs:
       - name: Create Draft Release
         if: ${{ inputs.create_release }}
         id: create_release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
